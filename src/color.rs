@@ -1,5 +1,4 @@
 use crate::vec3::Vec3;
-use std::fmt;
 
 pub type Color = Vec3;
 

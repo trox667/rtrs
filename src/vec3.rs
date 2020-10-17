@@ -32,6 +32,14 @@ impl Sub for Vec3 {
         }
     }
 }
+impl Sub<f32> for Vec3 {
+    type Output = Self;
+    fn sub(self, other: f32) -> Self {
+        Self {
+            e: [self.x() - other, self.y() - other, self.z() - other],
+        }
+    }
+}
 
 impl Div for Vec3 {
     type Output = Self;
@@ -114,10 +122,8 @@ impl Vec3 {
         Self::length_squared(self).sqrt()
     }
 
-    pub fn dot(&self, v: Self) -> Self {
-        Self {
-            e: [self.x() * v.x(), self.y() * v.y(), self.z() * v.z()],
-        }
+    pub fn dot(&self, v: Self) -> f32 {
+        self.x() * v.x() + self.y() * v.y() + self.z() * v.z()
     }
 
     pub fn cross(&self, v: Self) -> Self {
