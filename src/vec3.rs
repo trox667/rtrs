@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul};
+use std::ops::{Add, Div, Mul, Sub};
 
 pub type Point3 = Vec3;
 
@@ -15,6 +15,19 @@ impl Add for Vec3 {
                 self.x() + other.x(),
                 self.y() + other.y(),
                 self.z() + other.z(),
+            ],
+        }
+    }
+}
+
+impl Sub for Vec3 {
+    type Output = Self;
+    fn sub(self, other: Self) -> Self {
+        Self {
+            e: [
+                self.x() - other.x(),
+                self.y() - other.y(),
+                self.z() - other.z(),
             ],
         }
     }
