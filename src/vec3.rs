@@ -1,5 +1,8 @@
 use std::ops::{Add, Div, Mul};
 
+pub type Point3 = Vec3;
+
+#[derive(Default, Debug, Copy, Clone, PartialEq)]
 pub struct Vec3 {
     e: [f32; 3],
 }
