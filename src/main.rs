@@ -1,29 +1,17 @@
 mod color;
+mod hittable;
+mod hittable_list;
 mod ray;
+mod rtweekend;
+mod sphere;
 mod vec3;
 
-fn hit_sphere(center: &vec3::Point3, radius: f32, r: &ray::Ray) -> f32 {
-    let oc = r.origin() - *center;
-    let a = r.direction().dot(r.direction());
-    let b = r.direction().dot(oc) * 2.0;
-    let c = oc.dot(oc) - radius * radius;
+use std::rc::Rc;
 
-    // https://de.wikipedia.org/wiki/Diskriminante
-    let discriminant = b * b - a * 4.0 * c;
-
-    // https://de.wikipedia.org/wiki/Quadratische_Gleichung#L%C3%B6sungsformel_f%C3%BCr_die_allgemeine_quadratische_Gleichung_(a-b-c-Formel)
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
-    }
-}
-
-fn ray_color(r: &ray::Ray) -> color::Color {
-    let t = hit_sphere(&vec3::Point3::new(0.0, 0.0, -1.0), 0.5, r);
-    if (t > 0.0) {
-        let n = (r.point_at(t) - vec3::Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return color::Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
+fn ray_color(r: &ray::Ray, world: &dyn hittable::Hittable) -> color::Color {
+    let mut hit_record = hittable::HitRecord::default();
+    if world.hit(r, 0.0, rtweekend::INFINITY, &mut hit_record) {
+        return (hit_record.normal + color::Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
     let unit_direction = r.direction().unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
@@ -36,6 +24,17 @@ fn main() {
 
     let image_width: usize = 400;
     let image_height: usize = (image_width as f32 / aspect_ratio).floor() as usize;
+
+    // world
+    let mut world = hittable_list::HittableList::default();
+    world.add(Rc::new(sphere::Sphere::new(
+        &vec3::Point3::new(0.0, 0.0, -1.0),
+        0.5,
+    )));
+    world.add(Rc::new(sphere::Sphere::new(
+        &vec3::Point3::new(0.0, -100.5, -1.0),
+        100.0,
+    )));
 
     // camera
     let viewport_height = 2.0;
@@ -62,7 +61,7 @@ fn main() {
                 &origin,
                 &(lower_left_corner + horizontal * u + vertical * v - origin),
             );
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
 
             println!("{}", color::write_color(&pixel_color));
         });
