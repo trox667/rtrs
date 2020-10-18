@@ -2,19 +2,28 @@ mod color;
 mod ray;
 mod vec3;
 
-fn hit_sphere(center: &vec3::Point3, radius: f32, r: &ray::Ray) -> bool {
+fn hit_sphere(center: &vec3::Point3, radius: f32, r: &ray::Ray) -> f32 {
     let oc = r.origin() - *center;
     let a = r.direction().dot(r.direction());
     let b = r.direction().dot(oc) * 2.0;
     let c = oc.dot(oc) - radius * radius;
+
+    // https://de.wikipedia.org/wiki/Diskriminante
     let discriminant = b * b - a * 4.0 * c;
 
-    discriminant > 0.0
+    // https://de.wikipedia.org/wiki/Quadratische_Gleichung#L%C3%B6sungsformel_f%C3%BCr_die_allgemeine_quadratische_Gleichung_(a-b-c-Formel)
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
 }
 
 fn ray_color(r: &ray::Ray) -> color::Color {
-    if hit_sphere(&vec3::Point3::new(0.0, 0.0, -1.0), 0.5, r) {
-        return color::Color::new(1.0, 0.0, 0.0);
+    let t = hit_sphere(&vec3::Point3::new(0.0, 0.0, -1.0), 0.5, r);
+    if (t > 0.0) {
+        let n = (r.point_at(t) - vec3::Vec3::new(0.0, 0.0, -1.0)).unit_vector();
+        return color::Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
     }
     let unit_direction = r.direction().unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
