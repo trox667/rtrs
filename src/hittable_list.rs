@@ -1,15 +1,15 @@
 use super::hittable::{HitRecord, Hittable};
 use super::ray;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Default, Clone)]
 pub struct HittableList {
-    pub objects: Vec<Rc<dyn Hittable>>,
+    pub objects: Vec<Arc<dyn Hittable + Sync + Send>>,
 }
 
 impl HittableList {
-    pub fn new(object: Rc<dyn Hittable>) -> Self {
+    pub fn new(object: Arc<dyn Hittable + Sync + Send>) -> Self {
         Self {
             objects: vec![object],
         }
@@ -19,7 +19,7 @@ impl HittableList {
         self.objects.clear();
     }
 
-    pub fn add(&mut self, object: Rc<dyn Hittable>) {
+    pub fn add(&mut self, object: Arc<dyn Hittable + Sync + Send>) {
         self.objects.push(object);
     }
 }
